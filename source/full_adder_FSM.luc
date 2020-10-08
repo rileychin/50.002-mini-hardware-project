@@ -1,0 +1,50 @@
+  
+module full_adder_FSM (
+	input clk,  // clock
+	input rst,  // reset
+    output out[2]
+  ) {
+  fsm y_controller(.clk(clk), .rst(rst)) = {S0, S1, S2,S3};
+  three_bit_display_led threebitdisplayled(.clk(clk), .rst(rst));
+ 
+  always {
+    
+    out = 2b00;
+    case (y_controller.q){
+    
+      //A B C=0 0 0 
+      y_controller.S0:
+      out = 2b00;
+      y_controller.d = y_controller.S1;
+    
+      //A B C==0 0 1 || 0 1 0 || 1 0 0
+      y_controller.S1:
+      out = 2b01;
+      if (threebitdisplayled.out == 3b010 || threebitdisplayled.out == 3b100){
+        y_controller.d = y_controller.S2;
+          }
+      else{
+        y_controller.d = y_controller.S1;
+        }
+    
+      //A B C==0 1 1|| 1 0 1|| 1 1 0 
+      y_controller.S2:
+      out = 2b10;
+        if (threebitdisplayled.out == 3b110){
+        y_controller.d = y_controller.S3;
+          }
+        else if (threebitdisplayled.out == 3b011){
+        y_controller.d = y_controller.S1;
+          }
+        else{
+        y_controller.d = y_controller.S2;
+          }
+      
+      //A B C == 1 1 0
+      y_controller.S3:
+      out = 2b11;
+      y_controller.d = y_controller.S0;
+      }
+    
+  }
+}
